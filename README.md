@@ -40,3 +40,27 @@ sudo docker run     -p "8080:8080"     --net=app-network     --name=adminer     
 ```
 Cette commande permet de lancer un docker qui permettra la visualisation de la base de données grâce à l'outil adminer.
 On le place dans le même network que notre base de données pour qu'il puisse accéder aux données.
+
+### Question 1-2 : Why do we need a multistage build? And explain each step of this dockerfile.
+
+Dockerfile :
+```
+# Build
+FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
+ENV MYAPP_HOME /opt/myapp
+WORKDIR $MYAPP_HOME
+COPY pom.xml .
+COPY src ./src
+RUN mvn package -DskipTests
+
+# Run
+FROM amazoncorretto:17
+ENV MYAPP_HOME /opt/myapp
+WORKDIR $MYAPP_HOME
+COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
+
+ENTRYPOINT java -jar myapp.jar
+```
+sudo docker build -t eliott_c/tp1_java_api .
+sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java
+
