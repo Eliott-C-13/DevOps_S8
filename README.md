@@ -2,7 +2,7 @@
 ## TP1 
 ### Question 1-1 :  Document your database container essentials: commands and Dockerfile.
 DockerFile :
-```
+```dockerfile
 FROM postgres:14.1-alpine
 
 ENV POSTGRES_DB=db \
@@ -46,7 +46,7 @@ On le place dans le même network que notre base de données pour qu'il puisse a
 Ici on a besoin d'un build multisatge car on veut pouvoir nommer l'étape de build pour pouvoir l'utiliser dans le run.
 
 Dockerfile :
-```
+```dockerfile
 # Build
 FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
 ENV MYAPP_HOME /opt/myapp
@@ -85,7 +85,7 @@ Commandes pour créer l'image et lancer le docker :
 PARTIE HTTP :
 
 Dockerfile :
-```
+```dockerfile
 FROM httpd:2.4
 COPY ./ /usr/local/apache2/htdocs/
 ```
