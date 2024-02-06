@@ -26,7 +26,7 @@ jobs:
         run: |
           cd DevOps/TP1_DevOps/TP1_api/
           #mvn --batch-mode --update-snapshots package
-          mvn -B verify sonar:sonar -Dsonar.projectKey=devops-2023 -Dsonar.organization=devops-school -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
+          mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organization=eliott-c-13 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
 
 
   # define job to build and publish docker image
