@@ -217,7 +217,7 @@ Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus
 
 ### Question 2-1 : What are testcontainers ?
 
-
+Ce sont simplement des bibliothèques Java qui me permettent d'exécuter un certain nombre de conteneurs Docker pendant les tests. Ici, j'utilise le conteneur postgresql pour m'attacher à mon application pendant les tests.
 
 ### Question 2-2 : Document your Github Actions configurations.
 
@@ -375,4 +375,16 @@ jobs:
 
 
 ### Question 2-3 : Document your quality gate configuration.
+
+#### Création du token dans sonar cloud :
+![sonar](https://github.com/Eliott-C-13/DevOps_S8/assets/116546339/8826c7f5-b105-4e8f-b335-490e337bd4e4)
+
+#### Modification du fichier de workflow pour tester le code dans sonar cloud :
+```yaml
+mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organization=eliott-c-13 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
+```
+
+#### Vérification dans le dashboard sonar cloud :
+![sonar_cloud_dash](https://github.com/Eliott-C-13/DevOps_S8/assets/116546339/094f129f-f4fa-4413-a4ab-63d27e356b55)
+
 
