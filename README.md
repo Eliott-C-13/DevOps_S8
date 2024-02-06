@@ -89,3 +89,50 @@ sudo docker cp  tp1_http:/usr/local/apache2/conf/httpd.conf /tmp/test
 
 Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on a désormais un seul point d'entrée pour notre application.
 
+### Question 1-4 : 
+
+Fichier : docker-compose
+```
+version: '3.8'
+
+services:
+    backend:
+        build: 
+          context: ../TP1_api
+          dockerfile: Dockerfile
+        networks: 
+          - my-network
+        depends_on: 
+          - database
+        environment:
+          - DB_HOSTNAME=database:5432
+          - DB=db
+          - DB_USER=usr
+          - DB_PASSWORD=pwd
+
+    database:
+        build:
+          context: ../TP1
+          dockerfile: Dockerfile
+        networks: 
+          - my-network
+        environment:
+          - POSTGRES_DB=db
+          - POSTGRES_DB_USER=usr
+          - POSTGRES_DB_PASSWORD=pwd
+
+    httpd:
+        build:
+          context: ../TP1_http
+          dockerfile: Dockerfile
+        ports: 
+          - "8080:80"
+        networks: 
+          - my-network
+        depends_on: 
+          - backend
+
+networks:
+    my-network: 
+```
+run command : ```sudo docker-compose up --build```
