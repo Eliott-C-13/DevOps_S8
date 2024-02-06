@@ -20,7 +20,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
-          cache: maeven
   
      #finally build your app with the latest command
       - name: Build and test with Maven
