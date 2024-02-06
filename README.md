@@ -110,7 +110,7 @@ Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on
 ### Question 1-4 : 
 
 Fichier : docker-compose.yml
-```
+```yaml
 version: '3.8'
 
 services:
@@ -178,7 +178,7 @@ Pour chaque projet on doit construire l'image du docker puis lui ajouter un tag 
 - ```sudo docker push eliottc13/tp1_http```
 
 #### Modifications dans le docker compose :
-```
+```yaml
 version: '3.7'
 
 services:
@@ -222,7 +222,7 @@ Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus
 ### Question 2-2 : Document your Github Actions configurations.
 
 Fichier : main.yml :
-```
+```yaml
 name: CI devops 2023
 on:
   push:
@@ -246,6 +246,8 @@ jobs:
         run: |
           cd DevOps/TP1_DevOps/TP1_api/
           #mvn --batch-mode --update-snapshots package
+          # on build avec maeven et on fait vérifier les codes par un outil externe : sonar
+          # on utilise ici un secret pour le token de sonar 
           mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organization=eliott-c-13 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
 
 
@@ -255,7 +257,7 @@ jobs:
   
    steps:
      - name: Login to DockerHub
-       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }} #on utilise des secret pour pas que le username et le token se retrouvent en public 
 
      - name: Checkout code
        uses: actions/checkout@v2.5.0
@@ -283,6 +285,93 @@ jobs:
 ```
 
 #### Après le split pipelines :
+
+Fichier : test_backend.yml :
+```yaml
+name: test_backend
+on:
+  #to begin you want to launch this job in main and develop
+  push:
+    branches: 
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  test-backend: 
+    runs-on: ubuntu-22.04
+    steps:
+     #checkout your github code using actions/checkout@v2.5.0
+      - uses: actions/checkout@v2.5.0
+
+     #do the same with another action (actions/setup-java@v3) that enable to setup jdk 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+  
+     #finally build your app with the latest command
+      - name: Build and test with Maven
+        run: |
+          cd DevOps/TP1_DevOps/TP1_api/
+          #mvn --batch-mode --update-snapshots package
+          mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organization=eliott-c-13 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
+```
+
+Fichier : publish_push_images_docker.yml
+```yaml
+name: publish_push_images_docker
+on:
+  workflow_run:
+    workflows: [test_backend]
+    types:
+      - completed
+    branches:
+      - main
+jobs:
+# define job to build and publish docker image
+  build-and-push-docker-image:
+   # run only when code is compiling and tests are passing
+   runs-on: ubuntu-22.04
+   if: ${{ github.event.workflow_run.conclusion == 'success' }}
+   # steps to perform in job
+   steps:
+     - name: Login to DockerHub
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+     - name: Checkout code
+       uses: actions/checkout@v2.5.0
+  
+     - name: Build image and push backend
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./DevOps/TP1_DevOps/TP1_api/
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_java_api:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+  
+     - name: Build image and push database
+         # DO the same for database
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./DevOps/TP1_DevOps/TP1/
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_db:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+  
+     - name: Build image and push httpd
+       # DO the same for httpd
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./DevOps/TP1_DevOps/TP1_http/
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+```
 
 
 ### Question 2-3 : Document your quality gate configuration.
