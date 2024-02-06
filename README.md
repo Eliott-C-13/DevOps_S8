@@ -79,8 +79,8 @@ Ensuite on ajoute une étape de run :
 Enfin on définit l'exécutable par défaut du conteneur.
 
 Commandes pour créer l'image et lancer le docker :
-```sudo docker build -t eliott_c/tp1_java_api .```
-```sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java```
+- ```sudo docker build -t eliott_c/tp1_java_api .```
+- ```sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java```
 
 PARTIE HTTP :
 
@@ -211,6 +211,8 @@ services:
 networks:
     my-network: 
 ```
+Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus spécifier un build pour avoir une image mais directement aller la chercher sur dockerhub en spécifiant le paramètre image.
+
 ## TP2
 
 ### Question 2-1 : What are testcontainers ?
@@ -218,6 +220,70 @@ networks:
 
 
 ### Question 2-2 : Document your Github Actions configurations.
+
+Fichier : main.yml :
+```
+name: CI devops 2023
+on:
+  push:
+    branches: 
+      - main
+      - develop
+
+jobs:
+  test-backend: 
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2.5.0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+  
+      - name: Build and test with Maven
+        run: |
+          cd DevOps/TP1_DevOps/TP1_api/
+          #mvn --batch-mode --update-snapshots package
+          mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organization=eliott-c-13 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
+
+
+  build-and-push-docker-image:
+   needs: test-backend
+   runs-on: ubuntu-22.04
+  
+   steps:
+     - name: Login to DockerHub
+       run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+     - name: Checkout code
+       uses: actions/checkout@v2.5.0
+  
+     - name: Build image and push backend
+       uses: docker/build-push-action@v3
+       with:
+         context: ./DevOps/TP1_DevOps/TP1_api/
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_java_api:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+  
+     - name: Build image and push database
+       uses: docker/build-push-action@v3
+       with:
+         context: ./DevOps/TP1_DevOps/TP1/
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_db:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+  
+     - name: Build image and push httpd
+       uses: docker/build-push-action@v3
+       with:
+         context: ./DevOps/TP1_DevOps/TP1_http/
+         tags:  ${{secrets.DOCKERHUB_USERNAME}}/tp1_http:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+```
+
+#### Après le split pipelines :
+
 
 ### Question 2-3 : Document your quality gate configuration.
 
