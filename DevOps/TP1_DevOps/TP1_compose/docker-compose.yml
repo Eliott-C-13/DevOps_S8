@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+    backend:
+        #build: 
+        #  context: ../TP1_api
+        #  dockerfile: Dockerfile
+        image: eliottc13/tp1_java_api 
+        networks: 
+          - my-network
+        depends_on: 
+          - database
+        environment:
+          - HOSTNAME=database:5432
+          - DB=db
+          - USER=usr
+          - PASSWORD=pwd
+
+    database:
+        #build:
+        #  context: ../TP1
+        #  dockerfile: Dockerfile
+        image: eliottc13/tp1_db
+        networks: 
+          - my-network
+
+    httpd:
+        # build:
+        #   context: ../TP1_http
+        #   dockerfile: Dockerfile
+        image: eliottc13/tp1_http
+        ports: 
+          - "8080:80"
+        networks: 
+          - my-network
+        depends_on: 
+          - backend
+
+networks:
+    my-network: 
+
