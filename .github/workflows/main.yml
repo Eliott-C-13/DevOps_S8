@@ -23,4 +23,6 @@ jobs:
   
      #finally build your app with the latest command
       - name: Build and test with Maven
-        run: mvn --batch-mode --update-snapshots package
+        run: |
+          cd /DevOps/TP1_api/
+          mvn --batch-mode --update-snapshots package
