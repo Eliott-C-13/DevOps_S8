@@ -12,9 +12,9 @@ ENV POSTGRES_DB=db \
 COPY scripts/01-CreateScheme.sql /docker-entrypoint-initdb.d
 COPY scripts/02-InsertData.sql /docker-entrypoint-initdb.d
 ```
-
 - La première ligne permet d'utiliser l'image postgres:14.1-alpine pour le docker
 - Ensuite on définit les variables d'environnement utiles comme les paramètres de connexions à la base de données
+  (ici on définit les variables d'environnement POSTGRES_USER et POSGRES_PASSWORD et on leur assigne respectivement les valeurs usr et pwd).
 - Les instructions copy permettent de copier des éléments de notre machine hôte sur le docker, ici on fait la copie de scripts sql dans le fichier /docker-entrypoint-initdb. les placer dans ce dossier va nous permettre des exécuter au lancement du docker.
 
 Construction du docker :
@@ -41,7 +41,9 @@ sudo docker run     -p "8080:8080"     --net=app-network     --name=adminer     
 Cette commande permet de lancer un docker qui permettra la visualisation de la base de données grâce à l'outil adminer.
 On le place dans le même network que notre base de données pour qu'il puisse accéder aux données.
 
-### Question 1-2 : Why do we need a multistage build? And explain each step of this dockerfile.
+### Question 1-2 : Why do we need a multistage build ? And explain each step of this dockerfile.
+
+Ici on a besoin d'un build multisatge car on veut pouvoir nommer l'étape de build pour pouvoir l'utiliser dans le run.
 
 Dockerfile :
 ```
@@ -61,8 +63,24 @@ COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 
 ENTRYPOINT java -jar myapp.jar
 ```
-sudo docker build -t eliott_c/tp1_java_api .
-sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java
+Dans ce Dokerfile on commence par une étape de build :
+- On récupère une image maeven qu'on va nommer "myapp-build"
+- On définit la variable d'environnement "MYAPP_HOME"
+- On change le répertoire de travail
+- On fait 2 copie de fichier
+- On exécute la commande de build
+
+Ensuite on ajoute une étape de run :
+- On récupère une image
+- On définit la variable d'environnement "MYAPP_HOME"
+- On change le répertoire de travail
+- On copie le fichier créer par le build
+
+Enfin on définit l'exécutable par défaut du conteneur.
+
+Commandes pour créer l'image et lancer le docker :
+```sudo docker build -t eliott_c/tp1_java_api .```
+```sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java```
 
 PARTIE HTTP :
 
@@ -91,7 +109,7 @@ Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on
 
 ### Question 1-4 : 
 
-Fichier : docker-compose
+Fichier : docker-compose.yml
 ```
 version: '3.8'
 
@@ -135,26 +153,31 @@ services:
 networks:
     my-network: 
 ```
+
+Ce fichier docker-compose.yml permet de ne plus avoir à lancer les conteneurs un par un en se souciant que chacun est la bonne configuration dans son Dockerfile. Maintenant avec ce fichier on écrit les configurations de tous les conteneurs nécessaires dans ce fichier unique qui une fois rédiger permettra avec une seule commande de build tous les conteneurs et de les run.
+
 run command : ```sudo docker-compose up --build```
 
-### PUBLISH :
+### Question 1-5 : Document your publication commands and published images in dockerhub.
+
+Pour chaque projet on doit construire l'image du docker puis lui ajouter un tag avec la commande ```docker tag``` pour lui associer une version et enfin on peut publier l'image sur dockerhub via la commande ```docker push```.
 
 #### DB :
-sudo docker build -t eliottc13/tp1_db .
-sudo docker tag eliottc13/tp1_db eliottc13/tp1_db:1.0
-sudo docker push eliottc13/tp1_db:1.0
+- ```sudo docker build -t eliottc13/tp1_db .```
+- ```sudo docker tag eliottc13/tp1_db eliottc13/tp1_db:1.0```
+- ```sudo docker push eliottc13/tp1_db:1.0```
 
-#### Backend :
-sudo docker build -t eliottc13/tp1_java_api .
-sudo docker tag eliottc13/tp1_java_api eliottc13/tp1_java_api:1.0
-sudo docker push eliottc13/tp1_java_api
+#### BACKEND :
+- ```sudo docker build -t eliottc13/tp1_java_api .```
+- ```sudo docker tag eliottc13/tp1_java_api eliottc13/tp1_java_api:1.0```
+- ```sudo docker push eliottc13/tp1_java_api```
 
-#### http :
-sudo docker build -t eliottc13/tp1_http .
-sudo docker tag eliottc13/tp1_http eliottc13/tp1_http:1.0
-sudo docker push eliottc13/tp1_http
+#### HTTP :
+- ```sudo docker build -t eliottc13/tp1_http .```
+- ```sudo docker tag eliottc13/tp1_http eliottc13/tp1_http:1.0```
+- ```sudo docker push eliottc13/tp1_http```
 
-Modifications dans le docker compose :
+#### Modifications dans le docker compose :
 ```
 version: '3.7'
 
@@ -188,3 +211,13 @@ services:
 networks:
     my-network: 
 ```
+## TP2
+
+### Question 2-1 : What are testcontainers ?
+
+
+
+### Question 2-2 : Document your Github Actions configurations.
+
+### Question 2-3 : Document your quality gate configuration.
+
