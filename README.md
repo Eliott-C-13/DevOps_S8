@@ -136,3 +136,55 @@ networks:
     my-network: 
 ```
 run command : ```sudo docker-compose up --build```
+
+### PUBLISH :
+
+#### DB :
+sudo docker build -t eliottc13/tp1_db .
+sudo docker tag eliottc13/tp1_db eliottc13/tp1_db:1.0
+sudo docker push eliottc13/tp1_db:1.0
+
+#### Backend :
+sudo docker build -t eliottc13/tp1_java_api .
+sudo docker tag eliottc13/tp1_java_api eliottc13/tp1_java_api:1.0
+sudo docker push eliottc13/tp1_java_api
+
+#### http :
+sudo docker build -t eliottc13/tp1_http .
+sudo docker tag eliottc13/tp1_http eliottc13/tp1_http:1.0
+sudo docker push eliottc13/tp1_http
+
+Modifications dans le docker compose :
+```
+version: '3.7'
+
+services:
+    backend:
+        image: eliottc13/tp1_java_api 
+        networks: 
+          - my-network
+        depends_on: 
+          - database
+        environment:
+          - HOSTNAME=database:5432
+          - DB=db
+          - USER=usr
+          - PASSWORD=pwd
+
+    database:
+        image: eliottc13/tp1_db
+        networks: 
+          - my-network
+
+    httpd:
+        image: eliottc13/tp1_http
+        ports: 
+          - "8080:80"
+        networks: 
+          - my-network
+        depends_on: 
+          - backend
+
+networks:
+    my-network: 
+```
