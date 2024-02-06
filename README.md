@@ -326,15 +326,15 @@ on:
   workflow_run:
     workflows: [test_backend]
     types:
-      - completed
+      - completed #On attend que le premien pipeline soit finit
     branches:
-      - main
+      - main #On vérifie que ce soit bien la branche main
 jobs:
 # define job to build and publish docker image
   build-and-push-docker-image:
    # run only when code is compiling and tests are passing
    runs-on: ubuntu-22.04
-   if: ${{ github.event.workflow_run.conclusion == 'success' }}
+   if: ${{ github.event.workflow_run.conclusion == 'success' }} #On vérifie que le premier pipeline est terminé avec l'état success
    # steps to perform in job
    steps:
      - name: Login to DockerHub
