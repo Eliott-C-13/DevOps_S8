@@ -64,3 +64,28 @@ ENTRYPOINT java -jar myapp.jar
 sudo docker build -t eliott_c/tp1_java_api .
 sudo docker run -p 8080:8080 --network app-network --name tp1_java eliott_c/tp1_java
 
+PARTIE HTTP :
+
+Dockerfile :
+```
+FROM httpd:2.4
+COPY ./ /usr/local/apache2/htdocs/
+```
+
+```
+sudo docker build -t eliott_c/tp1_http .
+```
+
+```
+sudo docker run -dit -p 8090:80 --name tp1_http  eliott_c/tp1_http
+```
+
+GET current conf :
+```
+sudo docker cp  tp1_http:/usr/local/apache2/conf/httpd.conf /tmp/test
+```
+
+### Question 1-3 : Why do we need a reverse proxy?
+
+Le reverse proxy va nous servir à n'exposer qu'un seul port sur le réseaux, on a désormais un seul point d'entrée pour notre application.
+
