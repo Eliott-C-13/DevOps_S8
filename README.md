@@ -624,3 +624,76 @@ Déplacement de la tâche d'installation de docker dans main.yml :
    centos@eliott.caumon.takima.cloud : ok=7    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0 
   ```
   On constate bien que maintenant toutes les tâches d'installation de docker proviennent de : roles/docker.
+
+### Deploy your App :
+
+Fichier playbook.yml :
+
+Fichier roles/docker/tasks/main.yml :
+le fichier reste le même
+
+Fichier roles/network/tasks/main.yml :
+```yaml
+---
+# tasks file for roles/network
+# Create docker network
+- name: Create network
+  docker_network:
+    name: my-network
+    state: present
+```
+
+Fichier roles/app/tasks/main.yml :
+```yaml
+---
+# tasks file for roles/app
+# Launch app
+- name: Run HTTPD
+  docker_container:
+    name: httpd
+    image: eliottc13/tp1_http
+    networks:
+      - name: my-network
+    ports:
+      - "80:80"
+
+- name: backend
+  docker_container:
+    name: backend
+    image: eliottc13/tp1_java_api
+    networks:
+      - name: my-network
+```
+
+Fichier roles/database/tasks/main.yml :
+```yaml
+---
+# tasks file for roles/database
+# Launhch postgres database
+- name: Launch database
+  docker_container:
+    name: database
+    image: eliottc13/tp1_db
+    networks:
+      - name: my-network
+```
+
+Ajout des variables d'environnement dans le fichier setup.yml :
+```yaml
+all:
+ vars:
+   ansible_user: centos
+   ansible_ssh_private_key_file: ./id_rsa
+   HOSTNAME: database:5432
+   DB: db
+   USER: usr
+   PASSWORD: pwd
+   POSTGRES_DB: db
+   POSTGRES_USER: usr
+   POSTGRES_PASSWORD: pwd
+ children:
+   prod:
+     hosts: centos@eliott.caumon.takima.cloud
+```
+
+
