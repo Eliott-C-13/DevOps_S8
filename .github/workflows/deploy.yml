@@ -1,1 +1,27 @@
+name: CI devops 2023
+on:
+  #to begin you want to launch this job in main and develop
+  push:
+    branches: 
+      - main
+      - develop
+  pull_request:
 
+jobs:
+  deploy: 
+    #deploy ansible playbook
+    runs-on: ubuntu-22.04
+    steps:
+     #checkout your github code using actions/checkout@v2.5.0
+      - uses: actions/checkout@v2.5.0
+
+     #install ansible
+      - name: Install Ansible
+        run: sudo apt-get install ansible
+      
+    #run ansible playbook
+      - name: Run Ansible playbook
+        run: |
+          cd DevOps/TP1_DevOps/TP3/ansible/
+          echo "" > id_rsa
+          ansible-playbook playbook.yml
