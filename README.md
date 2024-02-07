@@ -540,15 +540,23 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
 
 Déplacement de la tâche d'installation de docker dans main.yml :
   
-- Fichier : setup.yml :
+- Fichier : playbook.yml :
   ```yaml
-  - hosts: all
+   - hosts: all
      gather_facts: false
      become: true
    
    # Install Docker
      tasks:
    
+     - name: Install Docker from role
+       include_role:
+         name: roles/docker
+  ```
+- Fichier : roles/docker/tasks/main.yml
+  ```yaml
+     ---
+   # tasks file for roles/docker
      - name: Install device-mapper-persistent-data
        yum:
          name: device-mapper-persistent-data
@@ -563,9 +571,10 @@ Déplacement de la tâche d'installation de docker dans main.yml :
        command:
          cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
    
-     - name: Install Docker from role
-       include_role:
-         name: roles/docker
+     - name: Install Docker
+       yum:
+         name: docker-ce
+         state: present
    
      - name: Install python3
        yum:
@@ -583,44 +592,35 @@ Déplacement de la tâche d'installation de docker dans main.yml :
        service: name=docker state=started
        tags: docker
   ```
-- Fichier : roles/docker/tasks/main.yml
-  ```yaml
-     ---
-   # tasks file for roles/docker
-     - name: Install Docker
-       yum:
-         name: docker-ce
-         state: present
-  ```
 - command : ``` ansible-playbook -i inventories/setup.yml playbook.yml ```
 - réponse :
   ```
   PLAY [all] *************************************************************************************************************************************************************************************************
 
-   TASK [Install device-mapper-persistent-data] ***************************************************************************************************************************************************************
-   ok: [centos@eliott.caumon.takima.cloud]
-   
-   TASK [Install lvm2] ****************************************************************************************************************************************************************************************
-   ok: [centos@eliott.caumon.takima.cloud]
-   
-   TASK [add repo docker] *************************************************************************************************************************************************************************************
-   changed: [centos@eliott.caumon.takima.cloud]
-   
    TASK [Install Docker from role] ****************************************************************************************************************************************************************************
+   
+   TASK [roles/docker : Install device-mapper-persistent-data] ************************************************************************************************************************************************
+   ok: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [roles/docker : Install lvm2] *************************************************************************************************************************************************************************
+   ok: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [roles/docker : add repo docker] **********************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
    
    TASK [roles/docker : Install Docker] ***********************************************************************************************************************************************************************
    ok: [centos@eliott.caumon.takima.cloud]
    
-   TASK [Install python3] *************************************************************************************************************************************************************************************
+   TASK [roles/docker : Install python3] **********************************************************************************************************************************************************************
    ok: [centos@eliott.caumon.takima.cloud]
    
-   TASK [Install docker with Python 3] ************************************************************************************************************************************************************************
+   TASK [roles/docker : Install docker with Python 3] *********************************************************************************************************************************************************
    ok: [centos@eliott.caumon.takima.cloud]
    
-   TASK [Make sure Docker is running] *************************************************************************************************************************************************************************
+   TASK [roles/docker : Make sure Docker is running] **********************************************************************************************************************************************************
    ok: [centos@eliott.caumon.takima.cloud]
    
    PLAY RECAP *************************************************************************************************************************************************************************************************
-   centos@eliott.caumon.takima.cloud : ok=7    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
+   centos@eliott.caumon.takima.cloud : ok=7    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0 
   ```
-  On constate bien que maintenant la tâche d'installation de docker est exécuter depuis le role.
+  On constate bien que maintenant toutes les tâches d'installation de docker proviennent de : roles/docker.
