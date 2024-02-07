@@ -692,21 +692,17 @@ Fichier roles/app/tasks/main.yml :
 ---
 # tasks file for roles/app
 # Launch app
-- name: Run HTTPD
-  docker_container:
-    name: httpd
-    image: eliottc13/tp1_http
-    networks:
-      - name: my-network
-    ports:
-      - "80:80"
-
 - name: backend
   docker_container:
     name: backend
     image: eliottc13/tp1_java_api
     networks:
       - name: my-network
+    env:
+      HOSTNAME: "{{ HOSTNAME }}"
+      DB: "{{ DB }}"
+      USER: "{{ USER }}"
+      PASSWORD: "{{ PASSWORD }}"
 ```
 
 Fichier roles/database/tasks/main.yml :
@@ -716,10 +712,14 @@ Fichier roles/database/tasks/main.yml :
 # Launhch postgres database
 - name: Launch database
   docker_container:
-    name: database
+    name: "{{ database_container_name }}"
     image: eliottc13/tp1_db
     networks:
       - name: my-network
+    env:
+      POSTGRES_USER: "{{ POSTGRES_USER }}"
+      POSTGRES_PASSWORD: "{{ POSTGRES_PASSWORD }}"
+      POSTGRES_DB: "{{ POSTGRES_DB }}"
 ```
 
 Ajout des variables d'environnement dans le fichier setup.yml :
@@ -728,7 +728,8 @@ all:
  vars:
    ansible_user: centos
    ansible_ssh_private_key_file: ./id_rsa
-   HOSTNAME: database:5432
+   database_container_name: database
+   HOSTNAME: "{{ database_container_name }}:5432"
    DB: db
    USER: usr
    PASSWORD: pwd
