@@ -1,5 +1,5 @@
 # DevOps_S8
-## TP1 
+## TP1 : Docker
 ### Question 1-1 :  Document your database container essentials: commands and Dockerfile.
 DockerFile :
 ```dockerfile
@@ -213,7 +213,7 @@ networks:
 ```
 Maintenant que nos images docker sont sûr le dépôt de dockerhub on ne va plus spécifier un build pour avoir une image mais directement aller la chercher sur dockerhub en spécifiant le paramètre image.
 
-## TP2
+## TP2 : Github Actions
 
 ### Question 2-1 : What are testcontainers ?
 
@@ -386,5 +386,35 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
 
 #### Vérification dans le dashboard sonar cloud :
 ![sonar_cloud_dash](https://github.com/Eliott-C-13/DevOps_S8/assets/116546339/094f129f-f4fa-4413-a4ab-63d27e356b55)
+
+## TP3 : Ansible
+
+### Ping :
+
+- Fichier setup.yml :
+  ```yaml
+  all:
+    vars:
+      ansible_user: centos
+      ansible_ssh_private_key_file: ./id_rsa
+    children:
+      prod:
+        hosts: centos@eliott.caumon.takima.cloud
+  ```
+- Command :
+  ```ansible all -i inventories/setup.yml -m ping```
+- Réponse :
+  ```
+  centos@eliott.caumon.takima.cloud | SUCCESS => {
+       "ansible_facts": {
+           "discovered_interpreter_python": "/usr/bin/python"
+       },
+       "changed": false,
+       "ping": "pong"
+   }
+  ```
+### Aficher l'OS de la machine :
+- Command : ``` ansible all -i inventories/setup.yml -m setup -a "filter=ansible_distribution*" ```
+
 
 
