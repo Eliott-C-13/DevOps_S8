@@ -415,6 +415,44 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
   ```
 ### Aficher l'OS de la machine :
 - Command : ``` ansible all -i inventories/setup.yml -m setup -a "filter=ansible_distribution*" ```
+- Réponse :
+  ```
+  centos@eliott.caumon.takima.cloud | SUCCESS => {
+       "ansible_facts": {
+           "ansible_distribution": "CentOS",
+           "ansible_distribution_file_parsed": true,
+           "ansible_distribution_file_path": "/etc/redhat-release",
+           "ansible_distribution_file_variety": "RedHat",
+           "ansible_distribution_major_version": "7",
+           "ansible_distribution_release": "Core",
+           "ansible_distribution_version": "7.9",
+           "discovered_interpreter_python": "/usr/bin/python"
+       },
+       "changed": false
+   }
+  ```
+### First Playbook :
 
+- Fichier playbook.yml :
+  ```yaml
+  - hosts: all
+     gather_facts: false
+     become: true
+   
+     tasks:
+      - name: Test connection
+        ping:
+  ```
+- Command : ``` ansible-playbook -i inventories/setup.yml playbook.yml ```
+- Réponse :
+  ```
+   PLAY [all] *************************************************************************************************************************************************************************************************
+   
+   TASK [Test connection] *************************************************************************************************************************************************************************************
+   ok: [centos@eliott.caumon.takima.cloud]
+   
+   PLAY RECAP *************************************************************************************************************************************************************************************************
+   centos@eliott.caumon.takima.cloud : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+  ```
 
 
