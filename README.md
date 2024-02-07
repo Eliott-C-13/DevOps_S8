@@ -628,6 +628,38 @@ Déplacement de la tâche d'installation de docker dans main.yml :
 ### Deploy your App :
 
 Fichier playbook.yml :
+```yaml
+- hosts: all
+  gather_facts: false
+  become: true
+
+# Install Docker
+  tasks:
+
+  - name: Install Docker from role
+    include_role:
+      name: roles/docker
+
+# Create network
+  - name: Create network
+    include_role:
+      name: roles/network
+
+# Launch database
+  - name: Launch database
+    include_role:
+      name: roles/database
+
+# Launch proxy
+  - name: Run HTTPD
+    include_role:
+      name: roles/proxy
+
+# Launch app
+  - name: Launch app
+    include_role:
+      name: roles/app
+```
 
 Fichier roles/docker/tasks/main.yml :
 le fichier reste le même
@@ -641,6 +673,18 @@ Fichier roles/network/tasks/main.yml :
   docker_network:
     name: my-network
     state: present
+```
+
+Fichier roles/proxy/tasks/main.yml :
+```yaml
+- name: Run HTTPD
+  docker_container:
+    name: httpd
+    image: eliottc13/tp1_http
+    networks:
+      - name: my-network
+    ports:
+      - "80:80"
 ```
 
 Fichier roles/app/tasks/main.yml :
