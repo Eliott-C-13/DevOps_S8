@@ -530,7 +530,7 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
    PLAY RECAP *************************************************************************************************************************************************************************************************
    centos@eliott.caumon.takima.cloud : ok=7    changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
   ```
-  - Vérification sur la machine distante :
+- Vérification sur la machine distante :
     command : ``` docker --version ```
     réponse : ``` Docker version 25.0.3, build 4debf41 ```
 
