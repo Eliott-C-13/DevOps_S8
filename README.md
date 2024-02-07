@@ -455,4 +455,83 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
    centos@eliott.caumon.takima.cloud : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
   ```
 
+### Advanced Playbook :
 
+- Fichier playbook.yml :
+  ```yaml
+   - hosts: all
+     gather_facts: false
+     become: true
+   
+   # Install Docker
+     tasks:
+   
+     - name: Install device-mapper-persistent-data
+       yum:
+         name: device-mapper-persistent-data
+         state: latest
+   
+     - name: Install lvm2
+       yum:
+         name: lvm2
+         state: latest
+   
+     - name: add repo docker
+       command:
+         cmd: sudo yum-config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+   
+     - name: Install Docker
+       yum:
+         name: docker-ce
+         state: present
+   
+     - name: Install python3
+       yum:
+         name: python3
+         state: present
+   
+     - name: Install docker with Python 3
+       pip:
+         name: docker
+         executable: pip3
+       vars:
+         ansible_python_interpreter: /usr/bin/python3
+   
+     - name: Make sure Docker is running
+       service: name=docker state=started
+       tags: docker
+  ```
+- Command : ``` ansible-playbook -i inventories/setup.yml playbook.yml ```
+- Réponse :
+  ```
+  PLAY [all] *************************************************************************************************************************************************************************************************
+
+   TASK [Install device-mapper-persistent-data] ***************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [Install lvm2] ****************************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [add repo docker] *************************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [Install Docker] **************************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [Install python3] *************************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [Install docker with Python 3] ************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   TASK [Make sure Docker is running] *************************************************************************************************************************************************************************
+   changed: [centos@eliott.caumon.takima.cloud]
+   
+   PLAY RECAP *************************************************************************************************************************************************************************************************
+   centos@eliott.caumon.takima.cloud : ok=7    changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0  
+  ```
+  - Vérification sur la machine distante :
+    command : ``` docker --version ```
+    réponse : ``` Docker version 25.0.3, build 4debf41 ```
+
+    
