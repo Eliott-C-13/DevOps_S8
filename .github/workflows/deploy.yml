@@ -23,5 +23,5 @@ jobs:
       - name: Run Ansible playbook
         run: |
           cd DevOps/TP1_DevOps/TP3/ansible/
-          echo "" > id_rsa
+          echo "" > {{secrets.SSH_KEY}}
           ansible-playbook playbook.yml
