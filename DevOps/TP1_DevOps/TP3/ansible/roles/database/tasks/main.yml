@@ -1,0 +1,14 @@
+---
+# tasks file for roles/database
+# Launhch postgres database
+- name: Launch database
+  docker_container:
+    name: "{{ database_container_name }}"
+    image: eliottc13/tp1_db
+    networks:
+      - name: my-network
+    env:
+      POSTGRES_USER: "{{ POSTGRES_USER }}"
+      POSTGRES_PASSWORD: "{{ POSTGRES_PASSWORD }}"
+      POSTGRES_DB: "{{ POSTGRES_DB }}"
+    pull: true

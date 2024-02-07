@@ -1,0 +1,12 @@
+---
+# tasks file for roles/proxy
+# Launch proxy
+- name: Run HTTPD
+  docker_container:
+    name: httpd
+    image: eliottc13/tp1_http
+    networks:
+      - name: my-network
+    ports:
+      - "80:80"
+    pull: true

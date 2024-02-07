@@ -1,0 +1,10 @@
+---
+# tasks file for roles/front
+# Launch front
+- name: front
+  docker_container:
+    name: front
+    image: eliottc13/tp3_front
+    networks:
+      - name: my-network
+    pull: true

@@ -1,0 +1,15 @@
+---
+# tasks file for roles/app
+# Launch app
+- name: backend
+  docker_container:
+    name: backend
+    image: eliottc13/tp1_java_api
+    networks:
+      - name: my-network
+    env:
+      HOSTNAME: "{{ HOSTNAME }}"
+      DB: "{{ DB }}"
+      USER: "{{ USER }}"
+      PASSWORD: "{{ PASSWORD }}"
+    pull: true
