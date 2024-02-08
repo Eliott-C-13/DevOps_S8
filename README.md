@@ -741,4 +741,3 @@ all:
      hosts: centos@eliott.caumon.takima.cloud
 ```
 
-
