@@ -7,6 +7,7 @@
     image: eliottc13/tp1_db
     networks:
       - name: my-network
+    volumes: /my/own/datadir:/var/lib/postgresql/data
     env:
       POSTGRES_USER: "{{ POSTGRES_USER }}"
       POSTGRES_PASSWORD: "{{ POSTGRES_PASSWORD }}"
