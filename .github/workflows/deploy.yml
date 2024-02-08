@@ -1,8 +1,8 @@
-name: Deploy
+name: deploy
 on:
   #to begin you want to launch this job in main and develop
   workflow_run:
-    workflows: [test_backend]
+    workflows: [publish_push_images_docker]
     types:
       - completed
     branches:
