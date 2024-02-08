@@ -1,13 +1,17 @@
 name: Deploy
 on:
   #to begin you want to launch this job in main and develop
-  push:
-    branches: 
+  workflow_run:
+    workflows: [test_backend]
+    types:
+      - completed
+    branches:
       - main
-      - develop
-  pull_request:
-
 jobs:
+  build-and-push-docker-image:
+   # run only when code is compiling and tests are passing
+   runs-on: ubuntu-22.04
+   if: ${{ github.event.workflow_run.conclusion == 'success' }}
   deploy: 
     #deploy ansible playbook
     runs-on: ubuntu-22.04
