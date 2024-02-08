@@ -24,4 +24,6 @@ jobs:
         run: |
           cd DevOps/TP1_DevOps/TP3/ansible/
           echo "" > {{secrets.SSH_KEY}}
+          echo ${{secrets.SSH_KEY}} > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
           ansible-playbook playbook.yml
