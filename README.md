@@ -741,3 +741,91 @@ all:
      hosts: centos@eliott.caumon.takima.cloud
 ```
 
+### Front :
+
+Changement dans la configuration http :
+
+```
+ServerName eliott.caumon@takima.cloud
+<VirtualHost *:80>
+ProxyPreserveHost On
+ProxyPass /api/ http://backend:8080/
+ProxyPassReverse /api/ http://backend:8080/
+
+ProxyPass / http://front:80/
+ProxyPassReverse / http://front:80/
+
+</VirtualHost>
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+```
+On ajoute un nouvel endpoint pour l'api et un autre pour le front.
+
+
+### Continuous deployment :
+
+Pour le déploiement continue on ajoute un nouveau fichier deploy.yml dans le workflow :
+```yaml
+name: deploy
+on:
+  #to begin you want to launch this job in main and develop
+  workflow_run:
+    workflows: [publish_push_images_docker]
+    types:
+      - completed
+    branches:
+      - main
+jobs:
+  deploy: 
+    #deploy ansible playbook
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-22.04
+    steps:
+     #checkout your github code using actions/checkout@v2.5.0
+      - uses: actions/checkout@v2.5.0
+
+     #install ansible
+      - name: Install Ansible
+        run: sudo apt-get install ansible
+
+      - name: Setting up Vault password
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > ~/vault_pass.pem
+          chmod 600 ~/vault_pass.pem
+      
+    #run ansible playbook
+      - name: Run Ansible playbook
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H eliott.caumon.takima.cloud >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ansible-playbook -i ./DevOps/TP1_DevOps/TP3/ansible/inventories/setup.yml ./DevOps/TP1_DevOps/TP3/ansible/playbook.yml --vault-password-file=~/vault_pass.pem
+```
+Ce fichier va permettre de se connecter en ssh au serveur et y installer un os, ansible et lancer le playbook qui contient toutes les étapes de déploiement. Les variables sensibles ont put être cryptée grâce à Vault. 
+ Fichier vault.yml :
+ ```yaml
+$ANSIBLE_VAULT;1.1;AES256
+65306565666334383233656561613630633863343564373833343036656233613761643932626330
+3361303234366363623430626430326539333637356365390a373131616638373465373733663530
+39663339306265313332303538306439326461656439313630666365353162386265346432386330
+6538643133353833630a306163396539646639336264643530663737393137383534663831616662
+36613239356430353235373566623537356238613932383561363132653230396261343235323031
+63393936323139663830613765323533333966373431343532373163643931663830656635623664
+61363665323139656532396133656166643361656338363338353937653664633561313732633734
+38323837306262336139306137383565666562613531663931393138613061383965396533313836
+65313564323238336335383337333233343963343964386231336362643438626137646531386261
+61386364663063313537363133316230366162363336616366653734393139306664373832383633
+32396237333761626437323330313033663262353934376232343761616432343965396337333963
+35303337366665643138393966393033623637633732393130313134306330346638613638393632
+30336533303733383663316439646163626431303763353264633935353239316538613537643764
+64316235626638313632643662303066623166636561326333326535306366333338623932656261
+363463333439323530663461633433313734
+```
+Il suffit ensuite d'ajouter les lignes suivantes dans le playbook :
+```yaml
+vars_files:
+    - vault.yml
+```
+
+
