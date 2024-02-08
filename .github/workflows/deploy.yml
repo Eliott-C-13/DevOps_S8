@@ -19,6 +19,11 @@ jobs:
      #install ansible
       - name: Install Ansible
         run: sudo apt-get install ansible
+
+      - name: Setting up Vault password
+        run: |
+          echo "${{ secrets.VAULT_PASSWORD }}" > ~/vault_pass.pem
+          chmod 600 ~/vault_pass.pem
       
     #run ansible playbook
       - name: Run Ansible playbook
@@ -27,4 +32,4 @@ jobs:
           ssh-keyscan -H eliott.caumon.takima.cloud >> ~/.ssh/known_hosts
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
-          ansible-playbook -i ./DevOps/TP1_DevOps/TP3/ansible/inventories/setup.yml ./DevOps/TP1_DevOps/TP3/ansible/playbook.yml
+          ansible-playbook -i ./DevOps/TP1_DevOps/TP3/ansible/inventories/setup.yml ./DevOps/TP1_DevOps/TP3/ansible/playbook.yml --private-key=~/private_key.pem --vault-password-file=~/vault_pass.pem
