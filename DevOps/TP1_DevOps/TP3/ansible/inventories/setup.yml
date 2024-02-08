@@ -1,15 +1,15 @@
 all:
  vars:
    ansible_user: centos
-   ansible_ssh_private_key_file: ~/.ssh/id_rsa
-   database_container_name: database
-   HOSTNAME: "{{ database_container_name }}:5432"
-   DB: db
-   USER: usr
-   PASSWORD: pwd
-   POSTGRES_DB: db
-   POSTGRES_USER: usr
-   POSTGRES_PASSWORD: pwd
+   #ansible_ssh_private_key_file: ~/.ssh/id_rsa
+   #database_container_name: database
+   #HOSTNAME: "{{ database_container_name }}:5432"
+   #DB: db
+   #USER: usr
+   #PASSWORD: pwd
+   #POSTGRES_DB: db
+   #POSTGRES_USER: usr
+   #POSTGRES_PASSWORD: pwd
  children:
    prod:
      hosts: centos@eliott.caumon.takima.cloud
