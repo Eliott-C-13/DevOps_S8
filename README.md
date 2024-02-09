@@ -221,6 +221,10 @@ Ce sont simplement des bibliothèques Java qui me permettent d'exécuter un cert
 
 ### Question 2-2 : Document your Github Actions configurations.
 
+Dans ce fichier main.yml on va décrire toutes les étapes nécéssaires à notre pipeline, on va aussi pouvoir conditionner l'exécution de certaines tâches. Par exemple on va vérifier s'il y à un git push sur la branche main ou develop, si c'est le cas on va pouvoir déclencher des actions : les jobs.
+
+Dans ces jobs on spécifie toutes les actions qui doivent-être faites comme installer java, compiler un projet, le faire vérifier par sonar,...
+
 Fichier : main.yml :
 ```yaml
 name: CI devops 2023
@@ -285,6 +289,11 @@ jobs:
 ```
 
 #### Après le split pipelines :
+
+Pour plus de lisibilité et faciliter la maintenance il possible de séparer ces actions dans différents pipelines.
+Ici on choisit de faire un pipeline pour le backend et un autre pour construire et publier nos images docker. Il possible de conditionner le lancement d'un pipeline.
+Par exemple ici on va vouloir lancer notre pipeline docker uniquement si le test backend c'est bien passé :
+```yaml  if: ${{ github.event.workflow_run.conclusion == 'success' }} ```
 
 Fichier : test_backend.yml :
 ```yaml
@@ -391,6 +400,8 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
 
 ### Ping :
 
+Pour pouvoir se connecter à distance sur le serveur ansible utilise une clé ssh.
+
 - Fichier setup.yml :
   ```yaml
   all:
@@ -432,6 +443,8 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
    }
   ```
 ### First Playbook :
+
+Grâce aux playbook il est possible d'automatiser des tâches, ici on lance un ping.
 
 - Fichier playbook.yml :
   ```yaml
@@ -535,11 +548,15 @@ mvn -B verify sonar:sonar -Dsonar.projectKey=Eliott-C-13_DevOps_S8 -Dsonar.organ
     réponse : ``` Docker version 25.0.3, build 4debf41 ```
 
 ### Using Roles :
+
+Les rôles ansibles permettent de séparer logiquement nos actions dans des fichiers et de les réutiliser quand cela est nécessaire.
+
+Ici on va créer un rôle docker et y placer toutes les actions qui lui sont liées.
 - Command : ``` ansible-galaxy init roles/docker ```
 - Réponse :  ``` - Role roles/docker was created successfully  ```
 
-Déplacement de la tâche d'installation de docker dans main.yml :
-  
+Ensuite il suffit juste d'appeler la tâche docker dans main.yml :
+
 - Fichier : playbook.yml :
   ```yaml
    - hosts: all
@@ -803,7 +820,10 @@ jobs:
           ansible-playbook -i ./DevOps/TP1_DevOps/TP3/ansible/inventories/setup.yml ./DevOps/TP1_DevOps/TP3/ansible/playbook.yml --vault-password-file=~/vault_pass.pem
 ```
 Ce fichier va permettre de se connecter en ssh au serveur et y installer un os, ansible et lancer le playbook qui contient toutes les étapes de déploiement. Les variables sensibles ont put être cryptée grâce à Vault. 
- Fichier vault.yml :
+
+Commande pour encrypter les variables : ```yaml ansible-vault create vault.yml``` il suffit ensuite d'ajouter un mot de passe et de mettre les informations à crypter dans le fichier.
+
+Fichier vault.yml généré :
  ```yaml
 $ANSIBLE_VAULT;1.1;AES256
 65306565666334383233656561613630633863343564373833343036656233613761643932626330
